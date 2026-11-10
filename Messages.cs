@@ -6,9 +6,9 @@ public class Messages
     private Dictionary<string, string> _dictionary;
     private Dictionary<string, string> _raceMap;
     private Dictionary<string, string> _occupationMap;
-    private Dictionary<string, string> _displayRaceMap;
-    private Dictionary<string, string> _displayOccupationMap;
-    private Dictionary<string, string> _displayWeaponMap;
+    private Dictionary<string, string> _displayRaceMap = new();
+    private Dictionary<string, string> _displayOccupationMap = new();
+    private Dictionary<string, string> _displayWeaponMap = new();
 
     public Messages()
     {
