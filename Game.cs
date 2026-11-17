@@ -222,7 +222,7 @@ public class Game
                 return;
             }
 
-        if (input == "r" || input == "retreat")
+        if (input == null || input == "r" || input == "retreat")
         {
             Console.WriteLine(messages.GetMessage("retreat"));
             return;

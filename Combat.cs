@@ -30,20 +30,23 @@ public class Combat
             if (player.HealthPoints <= 0)
                 return false;
 
-            Console.WriteLine(messages.GetMessage("attack_prompt"));
-            string? input = Console.ReadLine()?.Trim().ToLower();
-
-            if (input == "r" || input == "retreat")
+            while (true)
             {
-                PlayerRetreated = true;
-                Console.WriteLine(messages.GetMessage("retreat_combat"));
-                return false;
+                Console.WriteLine(messages.GetMessage("attack_prompt"));
+                string? input = Console.ReadLine()?.Trim().ToLower();
+
+                if (input == null || input == "r" || input == "retreat")
+                {
+                    PlayerRetreated = true;
+                    Console.WriteLine(messages.GetMessage("retreat_combat"));
+                    return false;
+                }
+
+                if (input == "a" || input == "attack")
+                    break;
+
+                Console.WriteLine(messages.GetMessage("invalid"));
             }
-
-            if (input == "a" || input == "attack")
-                continue;
-
-            Console.WriteLine(messages.GetMessage("invalid"));
         }
     }
 
