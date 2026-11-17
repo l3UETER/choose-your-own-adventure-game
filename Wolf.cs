@@ -55,7 +55,9 @@ public class Wolf
                 Console.WriteLine(messages.GetMessage("wolf_player_missed"));
             if (HealthPoints <= 0)
             {
+                player.Gold += 10;
                 Console.WriteLine(messages.GetMessage("wolf_defeated"));
+                Console.WriteLine(string.Format(messages.GetMessage("wolf_reward"), 10));
                 return true;
             }
             Console.WriteLine(string.Format(messages.GetMessage("wolf_attack"), player.Name));

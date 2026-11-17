@@ -1,6 +1,7 @@
 {
   "English": {
     "dictionary": {
+      "wolf_reward": "Defeating the Wolf earns you {0} gold.",
       "wolf_hurt": "The Wolf yelps, taking {0} damage.",
       "wolf_dodged": "The Wolf dodges your attack.",
       "wolf_player_missed": "Your attack misses the Wolf.",
@@ -133,6 +134,7 @@
   },
   "Italian": {
     "dictionary": {
+      "wolf_reward": "Sconfiggere il Lupo ti fa guadagnare {0} monete d'oro.",
       "wolf_hurt": "Il Lupo guaisce e subisce {0} danni.",
       "wolf_dodged": "Il Lupo schiva il tuo attacco.",
       "wolf_player_missed": "Il tuo attacco manca il Lupo.",
@@ -265,6 +267,7 @@
   },
   "Spanish": {
     "dictionary": {
+      "wolf_reward": "Derrotar al Lobo te otorga {0} de oro.",
       "wolf_hurt": "El Lobo aúlla al recibir {0} puntos de daño.",
       "wolf_dodged": "El Lobo esquiva tu ataque.",
       "wolf_player_missed": "Tu ataque no alcanza al Lobo.",
@@ -397,6 +400,7 @@
   },
   "French": {
     "dictionary": {
+      "wolf_reward": "Vaincre le Loup vous rapporte {0} pièces d'or.",
       "wolf_hurt": "Le Loup gémit et subit {0} points de dégâts.",
       "wolf_dodged": "Le Loup esquive votre attaque.",
       "wolf_player_missed": "Votre attaque manque le Loup.",

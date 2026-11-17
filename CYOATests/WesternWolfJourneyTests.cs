@@ -13,17 +13,22 @@ public class WesternWolfJourneyTests
 
     private static string RunJourney(Game game, string travel)
     {
+        using var input = new BoundedReader(
+            "1\n1\nhuman\nHero\nfighter\nroll\nroll\nroll\n2\n" + travel);
+        return CaptureConsole(game.StartGame, input);
+    }
+
+    private static string CaptureConsole(Action play, TextReader input)
+    {
         var originalIn = Console.In;
         var originalOut = Console.Out;
         var originalColor = Console.ForegroundColor;
-        using var input = new BoundedReader(
-            "1\n1\nhuman\nHero\nfighter\nroll\nroll\nroll\n2\n" + travel);
         using var output = new StringWriter();
         try
         {
             Console.SetIn(input);
             Console.SetOut(output);
-            game.StartGame();
+            play();
         }
         finally
         {
@@ -161,7 +166,22 @@ public class WesternWolfJourneyTests
     }
 
     [TestMethod]
-    public void WolfVictory_IsPlayerFirstAndPermanentlyClearsRouteWithoutReward()
+    public void WolfVictory_AddsTenGoldAndPreservesRewardAtMerchant()
+    {
+        // Check starting gold, kill the wolf in one hit, then inspect the balance.
+        string transcript = Journey("s\n3\nw\na\ns\n3\ne\n",
+            8, 9, 5, 15, 10, 5);
+
+        StringAssert.Contains(transcript, "The Wolf falls defeated.");
+        StringAssert.Contains(transcript, "Gold: 30");
+        Assert.AreEqual(1, transcript.Split("Gold: 20").Length - 1,
+            "Only the initial merchant visit should show the starting balance.");
+        Assert.AreEqual(1, transcript.Split("Gold: 30").Length - 1,
+            "The merchant should show the starting 20 gold plus the 10-gold reward.");
+    }
+
+    [TestMethod]
+    public void WolfVictory_IsPlayerFirstAndPermanentlyClearsRoute()
     {
         // Enchantment makes five damage lethal against eight health. No retaliation roll.
         string transcript = Journey("s\n2\n3\nw\na\nw\ns\n3\ne\n",
@@ -171,7 +191,7 @@ public class WesternWolfJourneyTests
         Assert.AreEqual(1, transcript.Split("Bite damage: 1-6").Length - 1);
         Assert.IsFalse(transcript.Contains("The Wolf bites"));
         StringAssert.Contains(transcript, "Gold: 5");
-        Assert.IsFalse(transcript.Contains("Gold: 15"));
+        StringAssert.Contains(transcript, "Gold: 15");
     }
 
     [TestMethod]
@@ -200,8 +220,160 @@ public class WesternWolfJourneyTests
         StringAssert.Contains(transcript, "Armor protection: 3");
         StringAssert.Contains(transcript, "Weapon: long sword");
         StringAssert.Contains(transcript, "The Wolf falls defeated.");
-        Assert.AreEqual(2, transcript.Split("Gold: 5").Length - 1);
-        Assert.IsFalse(transcript.Contains("Gold: 15"));
+        Assert.AreEqual(1, transcript.Split("Gold: 5").Length - 1);
+        StringAssert.Contains(transcript, "Gold: 15");
+    }
+
+    [TestMethod]
+    public void ClearedWestVisits_DoNotDuplicateReward()
+    {
+        string transcript = Journey("w\na\ns\n3\nw\ns\n3\nwest\ns\n3\ne\n",
+            8, 9, 5, 15, 10, 5);
+        Assert.AreEqual(3, transcript.Split("Gold: 30").Length - 1);
+        Assert.AreEqual(2, transcript.Split("The western route is clear.").Length - 1);
+        Assert.IsFalse(transcript.Contains("Gold: 40"));
+    }
+
+    [TestMethod]
+    public void WolfVictory_AnnouncesTenGoldRewardOnlyOnce()
+    {
+        string transcript = Journey("w\na\nw\ne\n", 8, 9, 5, 15, 10, 5);
+        Assert.AreEqual(1, transcript.Split("Defeating the Wolf earns you 10 gold.").Length - 1);
+    }
+
+    [TestMethod]
+    [DataRow("1", "2", 17, 14)]
+    [DataRow("2", "1", 14, 11)]
+    public void BuyUpgradeWinWolfBuyOther_BothRemainActiveWithoutDuplicateCharges(
+        string first, string second, int healthAfterWolf, int healthAfterDragon)
+    {
+        string transcript = Journey("s\n" + first + "\n3\nw\na\na\ns\n" + second +
+            "\n1\n2\n3\nw\ns\n1\n2\n3\nn\na\nr\n",
+            8, 9, 5, 20, 8, 11, 6, 15, 10, 5,
+            15, 11, 4, 1, 10, 11, 6);
+        int firstPurchase = transcript.IndexOf("Gold: 5");
+        int rewardBalance = transcript.IndexOf("Gold: 15");
+        int secondPurchase = transcript.IndexOf("Gold: 0");
+        Assert.IsTrue(firstPurchase >= 0 && rewardBalance > firstPurchase && secondPurchase > rewardBalance);
+        Assert.AreEqual(6, transcript.Split("Gold: 0").Length - 1,
+            "Owned upgrades must leave the zero balance unchanged on both visits.");
+        Assert.AreEqual(1, transcript.Split("Defeating the Wolf earns you 10 gold.").Length - 1);
+        Assert.AreEqual(1, transcript.Split("Magical armor equipped.").Length - 1);
+        Assert.AreEqual(1, transcript.Split("Your existing weapon is enchanted.").Length - 1);
+        StringAssert.Contains(transcript, $"Health Points: {healthAfterWolf}");
+        StringAssert.Contains(transcript, $"Hero's health points are now {healthAfterDragon}.");
+        StringAssert.Contains(transcript, "Weapon: long sword");
+        StringAssert.Contains(transcript, "Armor protection: 3");
+        StringAssert.Contains(transcript, "Weapon damage bonus: 3");
+        StringAssert.Contains(transcript, "Smolderfang's health points are now 13.");
+    }
+
+    [TestMethod]
+    [DataRow("1", "2")]
+    [DataRow("2", "1")]
+    public void WinBeforeShopping_ThirtyGoldBuysBothUpgradesAtExistingPrices(string first, string second)
+    {
+        string transcript = Journey("w\na\ns\n" + first + "\n" + second + "\n3\ne\n",
+            8, 9, 5, 15, 10, 5);
+        int thirty = transcript.IndexOf("Gold: 30");
+        int fifteen = transcript.IndexOf("Gold: 15");
+        int zero = transcript.IndexOf("Gold: 0");
+        Assert.IsTrue(thirty >= 0 && fifteen > thirty && zero > fifteen);
+        StringAssert.Contains(transcript, "Magical armor equipped.");
+        StringAssert.Contains(transcript, "Your existing weapon is enchanted.");
+        Assert.IsFalse(transcript.Contains("Not enough gold."));
+    }
+
+    [TestMethod]
+    [DataRow("w\nr\ns\n3\ne\n", false)]
+    [DataRow("w\na\nr\ns\n3\ne\n", true)]
+    [DataRow("w\nwrong\n\nr\ns\n3\ne\n", false)]
+    [DataRow("w\na\nwrong\n\nr\ns\n3\ne\n", true)]
+    public void RetreatAndInvalidInput_DoNotAwardGold(string travel, bool inCombat)
+    {
+        int[] round = inCombat ? [20, 20] : [];
+        string transcript = Journey(travel, [8, 9, 5, .. round]);
+        Assert.AreEqual(1, transcript.Split("Gold: 20").Length - 1);
+        Assert.IsFalse(transcript.Contains("Gold: 30"));
+        Assert.IsFalse(transcript.Contains("Defeating the Wolf earns"));
+    }
+
+    [TestMethod]
+    [DataRow("", 20, false)]
+    [DataRow("wrong\n", 20, false)]
+    [DataRow("a\n", 20, true)]
+    [DataRow("a\nwrong\n", 20, true)]
+    [DataRow("a\n", 1, true)]
+    public void ClosedInputAndPlayerDefeat_PreserveGold(string choices, int health, bool inCombat)
+    {
+        int[] rounds = inCombat ? [20, 8, 11, 6] : [];
+        var random = new RepeatableCombatTests.ScriptedRandom([8, 9, 12, .. rounds]);
+        var die = new Die(random);
+        var wolf = new Wolf(die);
+        var player = new Player(die)
+        {
+            Name = "Hero", Strength = 15, Agility = 10, HealthPoints = health, Gold = 5,
+            Weapon = new Weapon("long sword", 12, "sword")
+        };
+        var messages = new Messages();
+        messages.ReadDictionary();
+        using var input = new BoundedReader(choices);
+        string transcript = CaptureConsole(() =>
+            Assert.AreEqual(health > 1, wolf.Encounter(player, messages)), input);
+        Assert.AreEqual(5, player.Gold);
+        Assert.IsFalse(transcript.Contains("Defeating the Wolf earns"));
+        random.AssertExhausted();
+    }
+
+    [TestMethod]
+    public void NewAdventure_ResetsBalanceAndCanEarnRewardAgain()
+    {
+        int[] adventure = [10, 10, 20, 14, 1, 10, 19, 8, 9, 5, 15, 10, 5];
+        var random = new RepeatableCombatTests.ScriptedRandom([.. adventure, .. adventure]);
+        var game = new Game(new Die(random));
+        for (int i = 0; i < 2; i++)
+        {
+            string transcript = RunJourney(game, "s\n3\nw\na\ns\n3\ne\n");
+            Assert.AreEqual(1, transcript.Split("Gold: 20").Length - 1);
+            Assert.AreEqual(1, transcript.Split("Gold: 30").Length - 1);
+            Assert.AreEqual(1, transcript.Split("Defeating the Wolf earns you 10 gold.").Length - 1);
+        }
+        random.AssertExhausted();
+    }
+
+    [TestMethod]
+    [DataRow("English", "Defeating the Wolf earns you 10 gold.")]
+    [DataRow("Spanish", "Derrotar al Lobo te otorga 10 de oro.")]
+    [DataRow("French", "Vaincre le Loup vous rapporte 10 pièces d'or.")]
+    [DataRow("Italian", "Sconfiggere il Lupo ti fa guadagnare 10 monete d'oro.")]
+    public void LocalizedRewardFundsBothUpgrades_PreservingOriginalWeaponAndWounds(string language, string reward)
+    {
+        var random = new RepeatableCombatTests.ScriptedRandom(
+            8, 9, 5, 15, 10, 1, 8, 11, 6, 15, 10, 4);
+        var die = new Die(random);
+        var wolf = new Wolf(die);
+        var weapon = new Weapon("long sword", 12, "sword");
+        var player = new Player(die)
+        {
+            Name = "Hero", Strength = 15, Agility = 10, HealthPoints = 20, Weapon = weapon
+        };
+        var messages = new Messages();
+        messages.SetCurrentLanguage(language);
+        messages.ReadDictionary();
+        using var input = new BoundedReader("a\na\n1\n2\n3\n");
+        string transcript = CaptureConsole(() =>
+        {
+            Assert.IsTrue(wolf.Encounter(player, messages));
+            Assert.AreEqual(30, player.Gold);
+            new Game(die).VisitMerchant(player, messages);
+        }, input);
+        Assert.AreEqual(1, transcript.Split(reward).Length - 1);
+        Assert.AreEqual(0, player.Gold);
+        Assert.AreEqual(14, player.HealthPoints);
+        Assert.IsTrue(player.HasMagicalArmor);
+        Assert.IsTrue(player.HasWeaponEnchantment);
+        Assert.AreSame(weapon, player.Weapon);
+        random.AssertExhausted();
     }
 
     [TestMethod]
