@@ -48,6 +48,7 @@ public class Game
             {
                 Player player = new Player(_die);
                 player.CreateCharacter(messages);
+                Wolf? wolf = null;
 
                 bool inAdventureMenu = true;
                 while (inAdventureMenu)
@@ -64,6 +65,15 @@ public class Game
                     {
                         Console.WriteLine(messages.GetMessage("south_path_narrative"));
                         VisitMerchant(player, messages);
+                    }
+                    else if (selectedPath == "west")
+                    {
+                        wolf ??= new Wolf(_die);
+                        if (!wolf.Encounter(player, messages))
+                        {
+                            running = false;
+                            inAdventureMenu = false;
+                        }
                     }
                     else if (selectedPath == "north")
                     {
@@ -108,6 +118,7 @@ public class Game
         if (string.IsNullOrWhiteSpace(input)) return false;
         string trimmed = input.Trim().ToLower();
         return trimmed == "n" || trimmed == "north" ||
+               trimmed == "w" || trimmed == "west" ||
                trimmed == "s" || trimmed == "south" ||
                trimmed == "e" || trimmed == "exit";
     }
@@ -133,6 +144,9 @@ public class Game
 
             if (input == "south" || input == "s")
                 return "south";
+
+            if (input == "west" || input == "w")
+                return "west";
 
             if (input == null || input == "exit" || input == "e")
                 return "exit";
