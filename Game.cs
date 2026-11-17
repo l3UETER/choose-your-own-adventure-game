@@ -178,31 +178,20 @@ public class Game
             if (choice == null || choice == "3")
                 return;
 
-            if (choice == "1")
+            if (choice == "1" || choice == "2")
             {
-                if (player.HasMagicalArmor)
-                    Console.WriteLine(messages.GetMessage("merchant_armor_owned"));
-                else if (player.Gold < 15)
-                    Console.WriteLine(messages.GetMessage("merchant_insufficient_gold"));
-                else
+                Upgrade upgrade = choice == "1" ? Upgrade.MagicalArmor : Upgrade.WeaponEnchantment;
+                PurchaseResult result = player.PurchaseUpgrade(upgrade);
+                string feedbackKey = (upgrade, result) switch
                 {
-                    player.Gold -= 15;
-                    player.HasMagicalArmor = true;
-                    Console.WriteLine(messages.GetMessage("merchant_armor_purchased"));
-                }
-            }
-            else if (choice == "2")
-            {
-                if (player.HasWeaponEnchantment)
-                    Console.WriteLine(messages.GetMessage("merchant_enchantment_owned"));
-                else if (player.Gold < 15)
-                    Console.WriteLine(messages.GetMessage("merchant_insufficient_gold"));
-                else
-                {
-                    player.Gold -= 15;
-                    player.HasWeaponEnchantment = true;
-                    Console.WriteLine(messages.GetMessage("merchant_enchantment_purchased"));
-                }
+                    (_, PurchaseResult.InsufficientGold) => "merchant_insufficient_gold",
+                    (Upgrade.MagicalArmor, PurchaseResult.AlreadyOwned) => "merchant_armor_owned",
+                    (Upgrade.MagicalArmor, PurchaseResult.Purchased) => "merchant_armor_purchased",
+                    (Upgrade.WeaponEnchantment, PurchaseResult.AlreadyOwned) => "merchant_enchantment_owned",
+                    (Upgrade.WeaponEnchantment, PurchaseResult.Purchased) => "merchant_enchantment_purchased",
+                    _ => throw new InvalidOperationException("Unexpected purchase result.")
+                };
+                Console.WriteLine(messages.GetMessage(feedbackKey));
             }
             else
                 Console.WriteLine(messages.GetMessage("merchant_invalid"));

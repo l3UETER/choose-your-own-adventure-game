@@ -1,3 +1,16 @@
+public enum Upgrade
+{
+    MagicalArmor,
+    WeaponEnchantment
+}
+
+public enum PurchaseResult
+{
+    Purchased,
+    AlreadyOwned,
+    InsufficientGold
+}
+
 public class Player
 {
     private readonly Die _die;
@@ -24,6 +37,31 @@ public class Player
     public int ArmorProtection => HasMagicalArmor ? 3 : 0;
     public bool HasWeaponEnchantment { get; set; }
     public int WeaponDamageBonus => HasWeaponEnchantment ? 3 : 0;
+
+    public PurchaseResult PurchaseUpgrade(Upgrade upgrade)
+    {
+        const int upgradePrice = 15;
+        bool alreadyOwned = upgrade switch
+        {
+            Upgrade.MagicalArmor => HasMagicalArmor,
+            Upgrade.WeaponEnchantment => HasWeaponEnchantment,
+            _ => throw new ArgumentOutOfRangeException(nameof(upgrade))
+        };
+
+        if (alreadyOwned)
+            return PurchaseResult.AlreadyOwned;
+
+        if (Gold < upgradePrice)
+            return PurchaseResult.InsufficientGold;
+
+        Gold -= upgradePrice;
+        if (upgrade == Upgrade.MagicalArmor)
+            HasMagicalArmor = true;
+        else
+            HasWeaponEnchantment = true;
+
+        return PurchaseResult.Purchased;
+    }
 
     public void CreateCharacter(Messages messages)
     {
