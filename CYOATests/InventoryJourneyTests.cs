@@ -30,6 +30,163 @@ public class InventoryJourneyTests
         StringAssert.Contains(travelVisits[1], "Gold: 20");
     }
 
+    [TestMethod]
+    public void AfterBuyingArmor_InventoryShowsCurrentEquipmentAndRemainingGold()
+    {
+        string transcript = Journey("s\n1\n3\ni\ne\n");
+        string inventory = transcript.Split(English().GetMessage("inventory_header"))[1]
+            .Split(English().GetMessage("path_prompt_full"))[0];
+        StringAssert.Contains(inventory, "Weapon: long sword");
+        StringAssert.Contains(inventory, "Maximum base weapon damage: 12");
+        StringAssert.Contains(inventory, "Magical armor: Owned; damage reduction: 3");
+        StringAssert.Contains(inventory, "Weapon enchantment: Not owned; damage bonus: 0");
+        StringAssert.Contains(inventory, "Gold: 5");
+        Assert.IsFalse(transcript.Contains(English().GetMessage("path_invalid")));
+        StringAssert.Contains(transcript, English().GetMessage("adventure_ends"));
+    }
+
+    private static string[] InventoryDisplays(string transcript, Messages messages) =>
+        transcript.Split(messages.GetMessage("inventory_header")).Skip(1)
+            .Select(block => block.Split(messages.GetMessage("path_prompt_full"))[0].Trim()).ToArray();
+
+    private static void AssertInventory(string inventory, Messages messages, bool armor, bool enchantment, int gold)
+    {
+        StringAssert.Contains(inventory, messages.GetMessage("stats_weapon") + messages.TranslateWeaponForDisplay("long sword"));
+        StringAssert.Contains(inventory, string.Format(messages.GetMessage("inventory_base_damage"), 12));
+        StringAssert.Contains(inventory, string.Format(messages.GetMessage("inventory_armor"),
+            messages.GetMessage(armor ? "merchant_owned" : "merchant_not_owned"), armor ? 3 : 0));
+        StringAssert.Contains(inventory, string.Format(messages.GetMessage("inventory_enchantment"),
+            messages.GetMessage(enchantment ? "merchant_owned" : "merchant_not_owned"), enchantment ? 3 : 0));
+        StringAssert.Contains(inventory, string.Format(messages.GetMessage("merchant_gold"), gold));
+        Assert.IsFalse(inventory.Contains("["));
+        Assert.AreEqual(1, inventory.Split(messages.GetMessage("stats_weapon")).Length - 1,
+            "Inspection must show a single active weapon.");
+    }
+
+    [TestMethod]
+    [DataRow("English")]
+    [DataRow("Spanish")]
+    [DataRow("French")]
+    [DataRow("Italian")]
+    public void AfterBuyingEnchantment_BothAliasesShowSeparateBonusAndUnchangedBaseDamage(string language)
+    {
+        var messages = InLanguage(language);
+        string transcript = Journey("s\n2\n3\ni\ninventory\ne\n", language: language);
+        string[] inventories = InventoryDisplays(transcript, messages);
+        Assert.AreEqual(2, inventories.Length);
+        foreach (string inventory in inventories)
+            AssertInventory(inventory, messages, false, true, 5);
+        Assert.AreEqual(inventories[0], inventories[1]);
+        Assert.IsFalse(transcript.Contains(messages.GetMessage("path_invalid")));
+        StringAssert.Contains(transcript, messages.GetMessage("adventure_ends"));
+    }
+
+    [TestMethod]
+    [DataRow("English", "1", "2")]
+    [DataRow("Spanish", "2", "1")]
+    [DataRow("French", "1", "2")]
+    [DataRow("Italian", "2", "1")]
+    public void FailedPurchases_LeaveInventoryIdenticalToBeforeTheAttempt(string language, string purchased, string other)
+    {
+        var messages = InLanguage(language);
+        string transcript = Journey($"s\n{purchased}\n3\ni\ns\n{other}\n3\ninventory\ns\n{purchased}\n3\ni\ne\n",
+            language: language);
+        string[] inventories = InventoryDisplays(transcript, messages);
+        Assert.AreEqual(3, inventories.Length);
+        AssertInventory(inventories[0], messages, purchased == "1", purchased == "2", 5);
+        Assert.AreEqual(inventories[0], inventories[1], "Insufficient funds must not change inventory.");
+        Assert.AreEqual(inventories[0], inventories[2], "Buying an owned upgrade must not change inventory.");
+        StringAssert.Contains(transcript, messages.GetMessage("merchant_insufficient_gold"));
+        StringAssert.Contains(transcript, messages.GetMessage(purchased == "1" ? "merchant_armor_owned" : "merchant_enchantment_owned"));
+    }
+
+    [TestMethod]
+    [DataRow("English")]
+    [DataRow("Spanish")]
+    [DataRow("French")]
+    [DataRow("Italian")]
+    public void WolfReward_FundsBothUpgradesAndInventoryCannotRestoreRewardEligibility(string language)
+    {
+        var messages = InLanguage(language);
+        // A real starting balance of 20 plus one ten-gold reward pays both fifteen-gold prices.
+        string transcript = Journey("i\nw\na\ninventory\ns\n1\n2\n3\ni\ninventory\nw\ni\nw\ninventory\ne\n",
+            language: language, combatRolls: [8, 9, 5, 15, 10, 5]);
+        string[] inventories = InventoryDisplays(transcript, messages);
+        Assert.AreEqual(6, inventories.Length);
+        AssertInventory(inventories[0], messages, false, false, 20);
+        AssertInventory(inventories[1], messages, false, false, 30);
+        foreach (string inventory in inventories.Skip(2))
+            AssertInventory(inventory, messages, true, true, 0);
+        Assert.AreEqual(1, transcript.Split(string.Format(messages.GetMessage("wolf_reward"), 10)).Length - 1);
+        Assert.AreEqual(2, transcript.Split(messages.GetMessage("wolf_route_clear")).Length - 1);
+        Assert.IsFalse(transcript.Contains(messages.GetMessage("path_invalid")));
+        StringAssert.Contains(transcript, messages.GetMessage("adventure_ends"));
+    }
+
+    [TestMethod]
+    [DataRow("English")]
+    [DataRow("Spanish")]
+    [DataRow("French")]
+    [DataRow("Italian")]
+    public void RepeatedInventory_PreservesWoundsEncountersUpgradesRewardsAndSubsequentCombat(string language)
+    {
+        var messages = InLanguage(language);
+        string[] legs = ["s\n1\n3\n", "w\na\nr\n", "w\na\n", "s\n2\n3\n", "w\n", "n\na\nr\n"];
+        // Wound both combatants, retreat, finish the wolf, buy the second upgrade, then fight the dragon.
+        int[] rolls = [8, 9, 12, 15, 10, 4, 8, 11, 6, 15, 10, 8, 15, 11, 4, 1, 10, 11, 6];
+        string baseline = Journey(string.Concat(legs), language: language, combatRolls: rolls);
+        string inspected = Journey("i\ninventory\n" + string.Join("i\ninventory\n", legs),
+            language: language, combatRolls: rolls);
+
+        string prompt = messages.GetMessage("path_prompt_full");
+        string header = messages.GetMessage("inventory_header");
+        string withoutInspections = string.Join(prompt, inspected.Split(prompt).Where(visit => !visit.Contains(header)));
+        Assert.AreEqual(baseline, withoutInspections,
+            "With identical dice, removing inspection visits must leave the complete observable journey unchanged.");
+        string[] inventories = InventoryDisplays(inspected, messages);
+        Assert.AreEqual(12, inventories.Length);
+        (bool armor, bool enchantment, int gold)[] states =
+            [(false, false, 20), (true, false, 5), (true, false, 5), (true, false, 15), (true, true, 0), (true, true, 0)];
+        for (int visit = 0; visit < states.Length; visit++)
+        {
+            var state = states[visit];
+            AssertInventory(inventories[visit * 2], messages, state.armor, state.enchantment, state.gold);
+            Assert.AreEqual(inventories[visit * 2], inventories[visit * 2 + 1]);
+        }
+        StringAssert.Contains(inspected, string.Format(messages.GetMessage("wolf_health_now"), 8));
+        StringAssert.Contains(inspected, messages.GetMessage("stats_health") + 8); // Wolf health retained on return.
+        StringAssert.Contains(inspected, string.Format(messages.GetMessage("player_health_now"), "Hero", 17));
+        StringAssert.Contains(inspected, messages.GetMessage("stats_health") + 17); // Wounds retained into dragon combat.
+        StringAssert.Contains(inspected, string.Format(messages.GetMessage("dragon_health_now"), "Smolderfang", 13));
+        StringAssert.Contains(inspected, string.Format(messages.GetMessage("dragon_damage_dealt"), "Smolderfang", 3));
+        StringAssert.Contains(inspected, string.Format(messages.GetMessage("player_health_now"), "Hero", 14));
+        StringAssert.Contains(inspected, messages.GetMessage("retreat_combat"));
+        Assert.AreEqual(1, inspected.Split(string.Format(messages.GetMessage("wolf_reward"), 10)).Length - 1);
+    }
+
+    [TestMethod]
+    public void InventoryVisits_DoNotCreateSaveFilesOrModifyExistingFilesInWorkingDirectory()
+    {
+        string originalDirectory = Directory.GetCurrentDirectory();
+        var directory = Directory.CreateTempSubdirectory("cyoa-inventory-");
+        string existingFile = Path.Combine(directory.FullName, "existing-save.json");
+        File.WriteAllText(existingFile, "existing save must remain untouched");
+        DateTime originalWriteTime = File.GetLastWriteTimeUtc(existingFile);
+        try
+        {
+            Directory.SetCurrentDirectory(directory.FullName);
+            Journey("i\ninventory\ns\n1\n3\ni\ninventory\ne\n");
+            CollectionAssert.AreEquivalent(new[] { existingFile }, Directory.GetFiles(directory.FullName, "*", SearchOption.AllDirectories));
+            Assert.AreEqual("existing save must remain untouched", File.ReadAllText(existingFile));
+            Assert.AreEqual(originalWriteTime, File.GetLastWriteTimeUtc(existingFile));
+        }
+        finally
+        {
+            Directory.SetCurrentDirectory(originalDirectory);
+            directory.Delete(recursive: true);
+        }
+    }
+
     private static Messages English() => InLanguage("English");
 
     private static Messages InLanguage(string language)
