@@ -7,7 +7,7 @@ Workflow: resolved
 
 **Blocked by:** [02: Fight or retreat from a persistent western wolf](02-persistent-western-wolf.md).
 
-**Execution hold:** Lifted by the user for Ticket 03. Push remains on hold pending the manual playthrough.
+**Execution hold:** Lifted by the user for Ticket 03. The user completed the manual playthrough and authorized pushing after tests and review pass.
 
 ## Source and acceptance mapping
 
@@ -33,3 +33,5 @@ The first deterministic reward journey failed because the post-victory merchant 
 Verified both purchase orders with balances 5, 15, and 0; victory before shopping with balances 30, 15, and 0; repeated west and owned-item visits; no reward on retreat, invalid or closed input, or defeat; fresh-adventure reward eligibility; original weapon identity, wounds, and both equipment effects in subsequent combat. Updated Ticket 02's temporary no-reward expectations to the approved reward behavior.
 
 Validation: 42 focused wolf cases passed. Full dotnet test passed 203 tests with zero failures or skips, including northern endings and existing merchant behavior. Push held for the user's manual playthrough.
+
+The user subsequently confirmed that the manual Category A playthrough passed: the wolf encounter, one-time gold reward, and both merchant upgrades worked. The push hold is lifted, subject to passing tests and review and verifying main and the fork remote.
