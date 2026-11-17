@@ -61,6 +61,10 @@ public class Game
                         running = false;
                         inAdventureMenu = false;
                     }
+                    else if (selectedPath == "inventory")
+                    {
+                        player.DisplayInventory(messages);
+                    }
                     else if (selectedPath == "south")
                     {
                         Console.WriteLine(messages.GetMessage("south_path_narrative"));
@@ -115,12 +119,20 @@ public class Game
 
     public bool IsValidPathChoice(string? input)
     {
-        if (string.IsNullOrWhiteSpace(input)) return false;
-        string trimmed = input.Trim().ToLower();
-        return trimmed == "n" || trimmed == "north" ||
-               trimmed == "w" || trimmed == "west" ||
-               trimmed == "s" || trimmed == "south" ||
-               trimmed == "e" || trimmed == "exit";
+        return ParsePathChoice(input) != null;
+    }
+
+    private static string? ParsePathChoice(string? input)
+    {
+        return input?.Trim().ToLowerInvariant() switch
+        {
+            "n" or "north" => "north",
+            "s" or "south" => "south",
+            "w" or "west" => "west",
+            "e" or "exit" => "exit",
+            "i" or "inventory" => "inventory",
+            _ => null
+        };
     }
 
     public bool IsValidCombatChoice(string? input)
@@ -137,19 +149,13 @@ public class Game
         {
             Console.WriteLine(messages.GetMessage("path_prompt_full"));
             Console.Write(messages.GetMessage("enter_choice"));
-            string? input = Console.ReadLine()?.Trim().ToLower();
-
-            if (input == "north" || input == "n")
-                return "north";
-
-            if (input == "south" || input == "s")
-                return "south";
-
-            if (input == "west" || input == "w")
-                return "west";
-
-            if (input == null || input == "exit" || input == "e")
+            string? input = Console.ReadLine();
+            if (input == null)
                 return "exit";
+
+            string? choice = ParsePathChoice(input);
+            if (choice != null)
+                return choice;
 
             Console.WriteLine(messages.GetMessage("path_invalid"));
         }

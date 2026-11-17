@@ -168,6 +168,20 @@ public class Player
         }
     }
 
+    public void DisplayInventory(Messages messages)
+    {
+        Console.WriteLine(messages.GetMessage("inventory_header"));
+        Console.WriteLine(messages.GetMessage("stats_weapon") + (Weapon == null
+            ? messages.GetMessage("inventory_none") : messages.TranslateWeaponForDisplay(Weapon.Type)));
+        if (Weapon != null)
+            Console.WriteLine(string.Format(messages.GetMessage("inventory_base_damage"), Weapon.MaxDamage));
+        Console.WriteLine(string.Format(messages.GetMessage("inventory_armor"),
+            messages.GetMessage(HasMagicalArmor ? "merchant_owned" : "merchant_not_owned"), ArmorProtection));
+        Console.WriteLine(string.Format(messages.GetMessage("inventory_enchantment"),
+            messages.GetMessage(HasWeaponEnchantment ? "merchant_owned" : "merchant_not_owned"), WeaponDamageBonus));
+        Console.WriteLine(string.Format(messages.GetMessage("merchant_gold"), Gold));
+    }
+
     public int RollAttack()
     {
         return _die.Roll(20);

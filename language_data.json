@@ -1,6 +1,11 @@
 {
   "English": {
     "dictionary": {
+      "inventory_header": "----- Inventory -----",
+      "inventory_none": "None",
+      "inventory_base_damage": "Maximum base weapon damage: {0}",
+      "inventory_armor": "Magical armor: {0}; damage reduction: {1}",
+      "inventory_enchantment": "Weapon enchantment: {0}; damage bonus: {1}",
       "wolf_reward": "Defeating the Wolf earns you {0} gold.",
       "wolf_hurt": "The Wolf yelps, taking {0} damage.",
       "wolf_dodged": "The Wolf dodges your attack.",
@@ -65,7 +70,7 @@
       "stats_weapon": "Weapon: ",
       "stats_damage": "Weapon's Maximum Damage Points: ",
       "adventure_ends": "Adventure ends. Bye.",
-      "path_prompt_full": "You are walking in the mountains. Choose North (\u0027n\u0027 / \u0027north\u0027), South (\u0027s\u0027 / \u0027south\u0027), West (\u0027w\u0027 / \u0027west\u0027), or exit (\u0027e\u0027 / \u0027exit\u0027).",
+      "path_prompt_full": "You are walking in the mountains. Choose North (\u0027n\u0027 / \u0027north\u0027), South (\u0027s\u0027 / \u0027south\u0027), West (\u0027w\u0027 / \u0027west\u0027), or exit (\u0027e\u0027 / \u0027exit\u0027). Inventory (\u0027i\u0027 / \u0027inventory\u0027).",
       "path_invalid": "Invalid choice. Enter \u0027n\u0027, \u0027s\u0027, \u0027w\u0027 for West, or \u0027e\u0027.",
       "south_path_narrative": "You take the South path into the woods and meet a merchant.",
       "north_path_narrative": "You take the North path. After walking for hours, the air grows colder, and the trees become more sparse. You are confronted with a dragon. The dragon has a hoard of gold behind it.",
@@ -134,6 +139,11 @@
   },
   "Italian": {
     "dictionary": {
+      "inventory_header": "----- Inventario -----",
+      "inventory_none": "Nessuna",
+      "inventory_base_damage": "Danno base massimo dell'arma: {0}",
+      "inventory_armor": "Armatura magica: {0}; riduzione del danno: {1}",
+      "inventory_enchantment": "Incantamento dell'arma: {0}; danno aggiuntivo: {1}",
       "wolf_reward": "Sconfiggere il Lupo ti fa guadagnare {0} monete d'oro.",
       "wolf_hurt": "Il Lupo guaisce e subisce {0} danni.",
       "wolf_dodged": "Il Lupo schiva il tuo attacco.",
@@ -198,7 +208,7 @@
       "stats_weapon": "Arma: ",
       "stats_damage": "Danno massimo dell'arma: ",
       "adventure_ends": "L'avventura finisce. Arrivederci.",
-      "path_prompt_full": "Cammini tra le montagne. Scegli Nord (\u0027n\u0027 / \u0027north\u0027), Sud (\u0027s\u0027 / \u0027south\u0027), Ovest (\u0027w\u0027 / \u0027west\u0027), oppure esci (\u0027e\u0027 / \u0027exit\u0027).",
+      "path_prompt_full": "Cammini tra le montagne. Scegli Nord (\u0027n\u0027 / \u0027north\u0027), Sud (\u0027s\u0027 / \u0027south\u0027), Ovest (\u0027w\u0027 / \u0027west\u0027), oppure esci (\u0027e\u0027 / \u0027exit\u0027). Inventario (\u0027i\u0027 / \u0027inventory\u0027).",
       "path_invalid": "Scelta non valida. Digita \u0027n\u0027, \u0027s\u0027, \u0027w\u0027 per Ovest, oppure \u0027e\u0027.",
       "south_path_narrative": "Prendi il sentiero a sud nel bosco e incontri un mercante.",
       "north_path_narrative": "Prendi il sentiero a nord. Dopo ore di cammino, l'aria diventa più fredda e gli alberi si diradano. Ti trovi davanti a un drago. Dietro di lui c'è un tesoro d'oro.",
@@ -267,6 +277,11 @@
   },
   "Spanish": {
     "dictionary": {
+      "inventory_header": "----- Inventario -----",
+      "inventory_none": "Ninguna",
+      "inventory_base_damage": "Daño base máximo del arma: {0}",
+      "inventory_armor": "Armadura mágica: {0}; reducción de daño: {1}",
+      "inventory_enchantment": "Encantamiento del arma: {0}; daño adicional: {1}",
       "wolf_reward": "Derrotar al Lobo te otorga {0} de oro.",
       "wolf_hurt": "El Lobo aúlla al recibir {0} puntos de daño.",
       "wolf_dodged": "El Lobo esquiva tu ataque.",
@@ -331,7 +346,7 @@
       "stats_weapon": "Arma: ",
       "stats_damage": "Puntos Maximos de Dano del Arma: ",
       "adventure_ends": "La aventura termina. Adios.",
-      "path_prompt_full": "Caminas por las montañas. Elige Norte (\u0027n\u0027 / \u0027north\u0027), Sur (\u0027s\u0027 / \u0027south\u0027), Oeste (\u0027w\u0027 / \u0027west\u0027), o salir (\u0027e\u0027 / \u0027exit\u0027).",
+      "path_prompt_full": "Caminas por las montañas. Elige Norte (\u0027n\u0027 / \u0027north\u0027), Sur (\u0027s\u0027 / \u0027south\u0027), Oeste (\u0027w\u0027 / \u0027west\u0027), o salir (\u0027e\u0027 / \u0027exit\u0027). Inventario (\u0027i\u0027 / \u0027inventory\u0027).",
       "path_invalid": "Opción inválida. Escribe \u0027n\u0027, \u0027s\u0027, \u0027w\u0027 para Oeste, o \u0027e\u0027.",
       "south_path_narrative": "Tomas el camino del sur hacia el bosque y encuentras a un mercader.",
       "north_path_narrative": "Tomas el camino del norte. Despues de caminar durante horas, el aire se vuelve mas frio y los arboles mas escasos. Te enfrentas a un dragon. El dragon tiene una horda de oro detras de el.",
@@ -400,6 +415,11 @@
   },
   "French": {
     "dictionary": {
+      "inventory_header": "----- Inventaire -----",
+      "inventory_none": "Aucune",
+      "inventory_base_damage": "Dégâts de base maximaux de l'arme : {0}",
+      "inventory_armor": "Armure magique : {0}; réduction des dégâts : {1}",
+      "inventory_enchantment": "Enchantement de l'arme : {0}; bonus de dégâts : {1}",
       "wolf_reward": "Vaincre le Loup vous rapporte {0} pièces d'or.",
       "wolf_hurt": "Le Loup gémit et subit {0} points de dégâts.",
       "wolf_dodged": "Le Loup esquive votre attaque.",
@@ -464,7 +484,7 @@
       "stats_weapon": "Arme: ",
       "stats_damage": "Points de Dommages Maximum: ",
       "adventure_ends": "L'aventure se termine. Au revoir.",
-      "path_prompt_full": "Vous marchez dans les montagnes. Choisissez le Nord (\u0027n\u0027 / \u0027north\u0027), le Sud (\u0027s\u0027 / \u0027south\u0027), l\u0027Ouest (\u0027w\u0027 / \u0027west\u0027), ou quittez (\u0027e\u0027 / \u0027exit\u0027).",
+      "path_prompt_full": "Vous marchez dans les montagnes. Choisissez le Nord (\u0027n\u0027 / \u0027north\u0027), le Sud (\u0027s\u0027 / \u0027south\u0027), l\u0027Ouest (\u0027w\u0027 / \u0027west\u0027), ou quittez (\u0027e\u0027 / \u0027exit\u0027). Inventaire (\u0027i\u0027 / \u0027inventory\u0027).",
       "path_invalid": "Choix invalide. Tapez \u0027n\u0027, \u0027s\u0027, \u0027w\u0027 pour l\u0027Ouest, ou \u0027e\u0027.",
       "south_path_narrative": "Vous prenez le chemin du sud dans les bois et rencontrez un marchand.",
       "north_path_narrative": "Vous prenez le chemin du nord. Apres avoir marche pendant des heures, l'air devient plus froid et les arbres plus rares. Vous etes confronte a un dragon. Le dragon a un tresor d'or derriere lui.",
