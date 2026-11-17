@@ -1,6 +1,14 @@
 public class Player
 {
-    private readonly Die _die = new Die();
+    private readonly Die _die;
+
+    public Player() : this(new Die()) { }
+
+    public Player(Die die)
+    {
+        ArgumentNullException.ThrowIfNull(die);
+        _die = die;
+    }
 
     public string Name { get; set; } = "";
     public string Race { get; set; } = "";
@@ -11,6 +19,11 @@ public class Player
     public int HealthPoints { get; set; }
 
     public Weapon? Weapon { get; set; }
+    public int Gold { get; set; } = 20;
+    public bool HasMagicalArmor { get; set; }
+    public int ArmorProtection => HasMagicalArmor ? 3 : 0;
+    public bool HasWeaponEnchantment { get; set; }
+    public int WeaponDamageBonus => HasWeaponEnchantment ? 3 : 0;
 
     public void CreateCharacter(Messages messages)
     {
@@ -145,6 +158,8 @@ public class Player
         Console.WriteLine(messages.GetMessage("stats_strength") + Strength);
         Console.WriteLine(messages.GetMessage("stats_agility") + Agility);
         Console.WriteLine(messages.GetMessage("stats_health") + HealthPoints);
+        Console.WriteLine(string.Format(messages.GetMessage("stats_armor_protection"), ArmorProtection));
+        Console.WriteLine(string.Format(messages.GetMessage("stats_weapon_bonus"), WeaponDamageBonus));
 
         if (Weapon != null)
         {
@@ -168,7 +183,7 @@ public class Player
         if (Weapon == null)
             return 0;
 
-        return _die.Roll(Weapon.MaxDamage);
+        return _die.Roll(Weapon.MaxDamage) + WeaponDamageBonus;
     }
 
     public string Attack(Dragon dragon, Messages messages)

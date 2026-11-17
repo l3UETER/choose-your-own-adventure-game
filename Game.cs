@@ -1,5 +1,15 @@
 public class Game
 {
+    private readonly Die _die;
+
+    public Game() : this(new Die()) { }
+
+    public Game(Die die)
+    {
+        ArgumentNullException.ThrowIfNull(die);
+        _die = die;
+    }
+
     public void StartGame()
     {
         // Title screen
@@ -7,10 +17,7 @@ public class Game
         Console.WriteLine("Welcome to Choose Your Adventure Game");
         Console.WriteLine("=====================================\n");
 
-        // Instantiate Die first (per sequence diagram)
-        Die die = new Die();
-
-        Dragon dragon = new Dragon(die);
+        Dragon dragon = new Dragon(_die);
 
         // Language selection shown before Messages dictionary is loaded
         Console.WriteLine("Select language / Selecciona idioma / Choisissez la langue / Seleziona la lingua:");
@@ -39,7 +46,7 @@ public class Game
 
             if (choice == "1")
             {
-                Player player = new Player();
+                Player player = new Player(_die);
                 player.CreateCharacter(messages);
 
                 bool inAdventureMenu = true;
@@ -56,6 +63,7 @@ public class Game
                     else if (selectedPath == "south")
                     {
                         Console.WriteLine(messages.GetMessage("south_path_narrative"));
+                        VisitMerchant(player, messages);
                     }
                     else if (selectedPath == "north")
                     {
@@ -126,10 +134,58 @@ public class Game
             if (input == "south" || input == "s")
                 return "south";
 
-            if (input == "exit" || input == "e")
+            if (input == null || input == "exit" || input == "e")
                 return "exit";
 
             Console.WriteLine(messages.GetMessage("path_invalid"));
+        }
+    }
+
+    public void VisitMerchant(Player player, Messages messages)
+    {
+        while (true)
+        {
+            Console.WriteLine(messages.GetMessage("merchant_header"));
+            Console.WriteLine(string.Format(messages.GetMessage("merchant_gold"), player.Gold));
+            Console.WriteLine(string.Format(messages.GetMessage("merchant_armor_offer"),
+                messages.GetMessage(player.HasMagicalArmor ? "merchant_owned" : "merchant_not_owned")));
+            Console.WriteLine(string.Format(messages.GetMessage("merchant_enchantment_offer"),
+                messages.GetMessage(player.HasWeaponEnchantment ? "merchant_owned" : "merchant_not_owned")));
+            Console.WriteLine(messages.GetMessage("merchant_leave"));
+            Console.Write(messages.GetMessage("enter_choice"));
+            string? choice = Console.ReadLine()?.Trim();
+
+            if (choice == null || choice == "3")
+                return;
+
+            if (choice == "1")
+            {
+                if (player.HasMagicalArmor)
+                    Console.WriteLine(messages.GetMessage("merchant_armor_owned"));
+                else if (player.Gold < 15)
+                    Console.WriteLine(messages.GetMessage("merchant_insufficient_gold"));
+                else
+                {
+                    player.Gold -= 15;
+                    player.HasMagicalArmor = true;
+                    Console.WriteLine(messages.GetMessage("merchant_armor_purchased"));
+                }
+            }
+            else if (choice == "2")
+            {
+                if (player.HasWeaponEnchantment)
+                    Console.WriteLine(messages.GetMessage("merchant_enchantment_owned"));
+                else if (player.Gold < 15)
+                    Console.WriteLine(messages.GetMessage("merchant_insufficient_gold"));
+                else
+                {
+                    player.Gold -= 15;
+                    player.HasWeaponEnchantment = true;
+                    Console.WriteLine(messages.GetMessage("merchant_enchantment_purchased"));
+                }
+            }
+            else
+                Console.WriteLine(messages.GetMessage("merchant_invalid"));
         }
     }
 

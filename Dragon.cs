@@ -92,13 +92,12 @@ public class Dragon
             return string.Join(Environment.NewLine, output);
         }
 
-        int damage = RollDamage();
-        player.HealthPoints -= damage;
+        int damage = Math.Max(0, RollDamage() - player.ArmorProtection);
+        int initialHealth = player.HealthPoints;
+        player.HealthPoints = Math.Max(0, initialHealth - damage);
+        int healthLost = initialHealth - player.HealthPoints;
 
-        if (player.HealthPoints < 0)
-            player.HealthPoints = 0;
-
-        output.Add(string.Format(messages.GetMessage("dragon_damage_dealt"), Name, damage));
+        output.Add(string.Format(messages.GetMessage("dragon_damage_dealt"), Name, healthLost));
         output.Add(string.Format(messages.GetMessage("player_health_now"), player.Name, player.HealthPoints));
 
         if (player.HealthPoints <= 0)
